@@ -1,10 +1,10 @@
 package com.example.application.data.service;
 
+import com.example.application.data.repository.CompanyRepository;
+import com.example.application.data.repository.ContactRepository;
 import com.example.application.data.entity.Company;
 import com.example.application.data.entity.Contact;
 import com.example.application.data.entity.Status;
-import com.example.application.data.repository.CompanyRepository;
-import com.example.application.data.repository.ContactRepository;
 import com.example.application.data.repository.StatusRepository;
 import org.springframework.stereotype.Service;
 
@@ -27,14 +27,36 @@ public class CRMService {
     public List<Contact> findAllContacts(String filterText) {
         if(filterText == null || filterText.isEmpty())
             return contactRepository.findAll();
-        else
+        else {
+            System.out.println(contactRepository.searchCompany(filterText));
             return contactRepository.search(filterText);
+        }
     }
+
+    public List<Contact> findAllByCompany(String filterText) {
+        if(filterText == null || filterText.isEmpty())
+            return contactRepository.findAll();
+        else {
+            //System.out.println(contactRepository.searchCompany(filterText));
+            return contactRepository.searchCompany(filterText);
+        }
+    }
+
+    public List<Company> findAllCompanies(String filterText) {
+        if (filterText == null || filterText.isEmpty())
+            return companyRepository.findAll();
+        else
+            return companyRepository.search(filterText);
+    }
+
     public long countContacts(){
         return contactRepository.count();
     }
     public void deleteContact(Contact contact){
         contactRepository.delete(contact);
+    }
+    public void deleteCompany(Company company){
+        companyRepository.delete(company);
     }
     public void saveContact(Contact contact){
         if(contact == null) {
@@ -42,6 +64,13 @@ public class CRMService {
             return;
         }
         contactRepository.save(contact);
+    }
+    public void saveCompany(Company company){
+        if(company == null) {
+            System.err.println("Company is null!");
+            return;
+        }
+        companyRepository.save(company);
     }
     public List<Company> findAllCompanies() {
         return companyRepository.findAll();

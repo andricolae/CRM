@@ -1,10 +1,9 @@
 package com.example.application.views.list;
 
-import com.example.application.Application;
+import com.example.application.data.service.EmailService;
 import com.example.application.data.entity.Company;
 import com.example.application.data.entity.Contact;
 import com.example.application.data.entity.Status;
-import com.example.application.data.service.EmailService;
 import com.example.application.data.service.MailSenderConfig;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEvent;
@@ -21,33 +20,24 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.InputStreamSource;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.swing.*;
 import java.io.*;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 public class ContactForm extends FormLayout {
     Binder<Contact> binder = new BeanValidationBinder<>(Contact.class);
     TextField firstName = new TextField("First Name");
     TextField lastName = new TextField("Last Name");
     EmailField email = new EmailField("Email");
+
+    TextField tel = new TextField("Phone");
     ComboBox<Status> status = new ComboBox<>("Staus");
     ComboBox<Company> company = new ComboBox<>("Company");
     TextField emailSubject = new TextField("Subject...");
@@ -85,6 +75,7 @@ public class ContactForm extends FormLayout {
           firstName,
           lastName,
           email,
+          tel,
           company,
           status,
           emailSubject,
@@ -133,23 +124,6 @@ public class ContactForm extends FormLayout {
             notification.setPosition(Notification.Position.BOTTOM_STRETCH);
         });
 
-        /*sendWithAttach.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
-        MailSenderConfig mailSenderConfig1 = new MailSenderConfig();
-        JavaMailSender javaMailSender1 = mailSenderConfig1.javaMailSender();
-        EmailService emailService1 = new EmailService(javaMailSender1);
-        sendWithAttach.addClickListener(event -> {
-            try {
-                emailService1.send("mycrm586@gmail.com", email.getValue(), emailSubject.getValue(), emailBody.getValue(), attachName, inputStream);
-            } catch (MessagingException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            Notification notification = Notification.show("Email Sent!");
-            notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            notification.setPosition(Notification.Position.BOTTOM_STRETCH);
-        });*/
-
         return new HorizontalLayout(save, delete, sendEmail);
     }
 
@@ -162,7 +136,7 @@ public class ContactForm extends FormLayout {
         }
     }
 
-    // Events
+    /* **************************** Events **************************** */
     public static abstract class ContactFormEvent extends ComponentEvent<ContactForm> {
         private Contact contact;
 

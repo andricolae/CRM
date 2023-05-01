@@ -3,5 +3,6 @@
   <component name="JpaBuddyIdeaProjectConfig">
     <option name="defaultUnitInitialized" value="true" />
     <option name="renamerInitialized" value="true" />
+    <option name="packageNameForExtractSuperclass" value="com.example.application.data.entity" />
   </component>
 </project>

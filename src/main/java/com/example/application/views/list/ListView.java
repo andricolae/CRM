@@ -3,27 +3,16 @@ package com.example.application.views.list;
 import com.example.application.data.entity.Contact;
 import com.example.application.data.service.CRMService;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import jakarta.annotation.security.PermitAll;
-import org.atmosphere.interceptor.AtmosphereResourceStateRecovery;
 import org.springframework.context.annotation.Scope;
-
-import javax.swing.text.AbstractDocument;
-import java.util.Collections;
 
 @org.springframework.stereotype.Component
 @Scope("prototype")
@@ -33,6 +22,7 @@ import java.util.Collections;
 public class ListView extends VerticalLayout {
     Grid<Contact> grid = new Grid<>(Contact.class);
     TextField filterText =  new TextField();
+    TextField filterByCompany = new TextField();
     ContactForm cF;
     private CRMService service;
     public ListView(CRMService service) {
@@ -60,6 +50,8 @@ public class ListView extends VerticalLayout {
     private void updateList() {
         grid.setItems(service.findAllContacts(filterText.getValue()));
     }
+
+    private void updateSearchedByCompany() { grid.setItems(service.findAllByCompany(filterByCompany.getValue())); }
 
     private Component getContent() {
         HorizontalLayout content = new HorizontalLayout(grid, cF);
@@ -96,10 +88,15 @@ public class ListView extends VerticalLayout {
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
         filterText.addValueChangeListener(event -> updateList());
 
+        filterByCompany.setPlaceholder("Filter by company...");
+        filterByCompany.setClearButtonVisible(true);
+        filterByCompany.setValueChangeMode(ValueChangeMode.LAZY);
+        filterByCompany.addValueChangeListener(event -> updateSearchedByCompany());
+
         Button addContactButton = new Button("Add contact");
         addContactButton.addClickListener(event -> addContact());
 
-        HorizontalLayout toolbar = new HorizontalLayout(filterText, addContactButton);
+        HorizontalLayout toolbar = new HorizontalLayout(filterText, filterByCompany, addContactButton);
         toolbar.addClassName("toolbar");
 
         return toolbar;
@@ -113,11 +110,10 @@ public class ListView extends VerticalLayout {
     private void configureGrid() {
         grid.addClassName("contact-grid");
         grid.setSizeFull();
-        grid.setColumns("firstName", "lastName", "email");
+        grid.setColumns("firstName", "lastName", "email", "tel");
         grid.addColumn(contact -> contact.getCompany().getName()).setHeader("Company");
         grid.addColumn(contact -> contact.getStatus().getName()).setHeader("Status");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
-
         grid.asSingleSelect().addValueChangeListener(e -> editContact(e.getValue()));
     }
 

@@ -14,6 +14,14 @@ public class Company extends AbstractEntity {
     @NotBlank
     private String name;
 
+    private String cif;
+
+    private String com;
+
+    private String address;
+
+    private String tel;
+
     @OneToMany(mappedBy = "company")
     @Nullable
     private List<Contact> employees = new LinkedList<>();
@@ -30,6 +38,38 @@ public class Company extends AbstractEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCif() {
+        return cif;
+    }
+
+    public void setCif(String cif) {
+        this.cif = cif;
+    }
+
+    public String getCom() {
+        return com;
+    }
+
+    public void setCom(String com) {
+        this.com = com;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getTel() {
+        return tel;
+    }
+
+    public void setTel(String tel) {
+        this.tel = tel;
     }
 
     public List<Contact> getEmployees() {

@@ -31,6 +31,8 @@ public class Contact extends AbstractEntity {
     @NotEmpty
     private String email = "";
 
+    private int tel;
+
     @Override
     public String toString() {
         return firstName + " " + lastName;
@@ -74,5 +76,13 @@ public class Contact extends AbstractEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public int getTel() {
+        return tel;
+    }
+
+    public void setTel(int tel) {
+        this.tel = tel;
     }
 }
