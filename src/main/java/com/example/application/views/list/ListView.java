@@ -4,6 +4,7 @@ import com.example.application.data.entity.Contact;
 import com.example.application.data.service.CRMService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -94,6 +95,7 @@ public class ListView extends VerticalLayout {
         filterByCompany.addValueChangeListener(event -> updateSearchedByCompany());
 
         Button addContactButton = new Button("Add contact");
+        addContactButton.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         addContactButton.addClickListener(event -> addContact());
 
         HorizontalLayout toolbar = new HorizontalLayout(filterText, filterByCompany, addContactButton);

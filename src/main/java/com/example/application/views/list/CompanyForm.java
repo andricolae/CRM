@@ -9,7 +9,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
@@ -20,7 +19,7 @@ public class CompanyForm extends FormLayout{
     Binder<Company> binder = new BeanValidationBinder<>(Company.class);
     TextField name = new TextField("Name");
     TextField cif = new TextField("CIF");
-    EmailField com = new EmailField("Nr. Reg. Com.");
+    TextField com = new TextField("Nr. Reg. Com.");
 
     TextField tel = new TextField("Phone");
     TextField address = new TextField("Address");
@@ -37,8 +36,8 @@ public class CompanyForm extends FormLayout{
             name,
             cif,
             com,
-            tel,
             address,
+            tel,
             createButtonLayout()
         );
     }
@@ -92,7 +91,6 @@ public class CompanyForm extends FormLayout{
         DeleteEvent(CompanyForm source, Company company) {
             super(source, company);
         }
-
     }
 
     public Registration addDeleteListener(ComponentEventListener<DeleteEvent> listener) {
