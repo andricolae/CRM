@@ -57,7 +57,6 @@ public class ContactForm extends FormLayout {
     InputStream inputStream;
     private Contact contact;
 
-    // TODO - redesign
     public ContactForm(List<Company> companies, List<Status> statuses, List<Product> products) {
         addClassName("contact-form");
 

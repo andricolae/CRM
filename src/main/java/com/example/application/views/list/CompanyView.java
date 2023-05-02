@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -53,9 +54,10 @@ public class CompanyView extends VerticalLayout {
     }
 
     private Component getContent() {
-        HorizontalLayout content = new HorizontalLayout(grid, cF);
-        content.setFlexGrow(2, grid);
-        content.setFlexGrow(1, cF);
+        VerticalLayout content = new VerticalLayout(grid, cF);
+        cF.setWidth("75%");
+        //content.setFlexGrow(2, grid);
+        //content.setFlexGrow(1, cF);
         content.addClassName("content");
         content.setSizeFull();
         return content;
@@ -101,6 +103,7 @@ public class CompanyView extends VerticalLayout {
         grid.setColumns("name", "cif", "com", "address", "tel");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.asSingleSelect().addValueChangeListener(e -> editCompany(e.getValue()));
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
     }
 
     private void addCompany() {

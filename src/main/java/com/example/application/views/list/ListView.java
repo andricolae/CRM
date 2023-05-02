@@ -6,6 +6,7 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -55,9 +56,10 @@ public class ListView extends VerticalLayout {
     private void updateSearchedByCompany() { grid.setItems(service.findAllByCompany(filterByCompany.getValue())); }
 
     private Component getContent() {
-        HorizontalLayout content = new HorizontalLayout(grid, cF);
-        content.setFlexGrow(2, grid);
-        content.setFlexGrow(1, cF);
+        VerticalLayout content = new VerticalLayout(grid, cF);
+        //content.setFlexGrow(2, grid);
+        //content.setFlexGrow(1, cF);
+        cF.setWidth("75%");
         content.addClassName("content");
         content.setSizeFull();
         return content;
@@ -65,7 +67,7 @@ public class ListView extends VerticalLayout {
 
     private void configureForm() {
         cF = new ContactForm(service.findAllCompanies(), service.findAllStatuses(), service.retrieveProducts());
-        cF.setWidth("25em");
+        cF.setWidth("30em");
         cF.addSaveListener(this::saveContact); // <1>
         cF.addDeleteListener(this::deleteContact); // <2>
         cF.addCloseListener(e -> closeEditor()); // <3>
@@ -115,8 +117,12 @@ public class ListView extends VerticalLayout {
         grid.setColumns("firstName", "lastName", "email");
         grid.addColumn(contact -> contact.getCompany().getName()).setHeader("Company");
         grid.addColumn(contact -> contact.getStatus().getName()).setHeader("Status");
+
+        // TODO - grid cell personalized for each status value
+
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.asSingleSelect().addValueChangeListener(e -> editContact(e.getValue()));
+        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
     }
 
     private void editContact(Contact contact) {
