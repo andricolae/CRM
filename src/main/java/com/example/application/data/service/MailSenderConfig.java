@@ -16,6 +16,8 @@ public class MailSenderConfig {
         sender.setHost("smtp.gmail.com");
         sender.setPort(587);
         sender.setUsername("mycrm586@gmail.com");
+        // TODO - app password
+        //
         sender.setPassword("okrrzqmbuvloxmoi");
 
         Properties props = sender.getJavaMailProperties();

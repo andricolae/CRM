@@ -64,6 +64,8 @@ public class EmailService {
 
         mailSender.send(message);
     }*/
+
+    // TODO - multiple e-mail attachments
     public void send(String from, String to, String subject, String body, String attachName, InputStream inputStream) throws MessagingException, IOException {
 
         MimeMessage msg = mailSender.createMimeMessage();

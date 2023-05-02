@@ -1,18 +1,17 @@
 package com.example.application.views.list;
 
+import com.example.application.data.entity.Product;
 import com.example.application.data.service.EmailService;
 import com.example.application.data.entity.Company;
 import com.example.application.data.entity.Contact;
 import com.example.application.data.entity.Status;
 import com.example.application.data.service.MailSenderConfig;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEvent;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -24,11 +23,14 @@ import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.shared.Registration;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import javax.mail.MessagingException;
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ContactForm extends FormLayout {
@@ -38,10 +40,12 @@ public class ContactForm extends FormLayout {
     EmailField email = new EmailField("Email");
 
     TextField tel = new TextField("Phone");
+    TextField mentions = new TextField("Mentions");
     ComboBox<Status> status = new ComboBox<>("Staus");
     ComboBox<Company> company = new ComboBox<>("Company");
+    ComboBox<Product> product = new ComboBox<>("Products");
     TextField emailSubject = new TextField("Subject...");
-    TextArea emailBody = new TextArea("Message...");
+    TextArea message = new TextArea("Message...");
     Button save = new Button("Save");
     Button delete = new Button("Delete");
     Button cancel = new Button("Cancel");
@@ -53,7 +57,8 @@ public class ContactForm extends FormLayout {
     InputStream inputStream;
     private Contact contact;
 
-    public ContactForm(List<Company> companies, List<Status> statuses) {
+    // TODO - redesign
+    public ContactForm(List<Company> companies, List<Status> statuses, List<Product> products) {
         addClassName("contact-form");
 
         binder.bindInstanceFields(this);
@@ -63,6 +68,24 @@ public class ContactForm extends FormLayout {
 
         status.setItems(statuses);
         status.setItemLabelGenerator(Status::getName);
+
+        status.setRenderer(new ComponentRenderer<>(str -> {
+            Span text = new Span(String.valueOf(str.getName()));
+            if (str.getName().equals("Imported lead"))
+                text.getStyle().set("color", "blue");
+            if (str.getName().equals("Not contacted"))
+                text.getStyle().set("color", "red");
+            if (str.getName().equals("Contacted"))
+                text.getStyle().set("color", "orange");
+            if (str.getName().equals("Customer"))
+                text.getStyle().set("color", "green");
+            if (str.getName().equals("Closed (lost)"))
+                text.getStyle().set("color", "black");
+            return text;
+        }));
+
+        product.setItems(products);
+        product.setItemLabelGenerator(Product::getName);
 
         buffer = new MultiFileMemoryBuffer();
         upload = new Upload(buffer);
@@ -78,11 +101,15 @@ public class ContactForm extends FormLayout {
           tel,
           company,
           status,
+          mentions,
+          product,
           emailSubject,
-          emailBody,
+          message,
           upload,
           createButtonLayout()
         );
+
+
     }
 
     public void setContact(Contact contact) {
@@ -103,16 +130,18 @@ public class ContactForm extends FormLayout {
         cancel.addClickShortcut(Key.ESCAPE);
         cancel.addClickListener(event -> fireEvent(new CloseEvent(this)));
 
+        product.addValueChangeListener(event -> message.setValue(message.getValue() + "\n" + event.getValue().getName() + " Price: " + event.getValue().getPrice() + " Lei"));
+
         sendEmail.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         MailSenderConfig mailSenderConfig = new MailSenderConfig();
         JavaMailSender javaMailSender = mailSenderConfig.javaMailSender();
         EmailService emailService = new EmailService(javaMailSender);
         sendEmail.addClickListener(event -> {
             if (inputStream == null)
-                emailService.sendNoAttach("mycrm586@gmail.com", email.getValue(), emailSubject.getValue(), emailBody.getValue());
+                emailService.sendNoAttach("mycrm586@gmail.com", email.getValue(), emailSubject.getValue(), message.getValue());
             else {
                 try {
-                    emailService.send("mycrm586@gmail.com", email.getValue(), emailSubject.getValue(), emailBody.getValue(), attachName, inputStream);
+                    emailService.send("mycrm586@gmail.com", email.getValue(), emailSubject.getValue(), message.getValue(), attachName, inputStream);
                 } catch (MessagingException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
@@ -122,9 +151,12 @@ public class ContactForm extends FormLayout {
             Notification notification = Notification.show("Email Sent!");
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             notification.setPosition(Notification.Position.BOTTOM_STRETCH);
+            message.setValue("---" + DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                    .format(LocalDateTime.now()) + "---" + "\n" + message.getValue());
+            validateAndSave();
         });
 
-        return new HorizontalLayout(save, delete, sendEmail);
+        return new HorizontalLayout(save, delete, cancel, sendEmail);
     }
 
     private void validateAndSave() {

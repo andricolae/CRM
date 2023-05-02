@@ -102,4 +102,7 @@ public class CRMService {
     public List<Status> findAllStatuses() {
         return statusRepository.findAll();
     }
+    public List<Product> retrieveProducts() {
+        return productRepository.findAll();
+    }
 }

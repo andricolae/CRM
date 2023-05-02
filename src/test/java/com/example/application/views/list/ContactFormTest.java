@@ -2,6 +2,7 @@ package com.example.application.views.list;
 
 import com.example.application.data.entity.Company;
 import com.example.application.data.entity.Contact;
+import com.example.application.data.entity.Product;
 import com.example.application.data.entity.Status;
 
 import java.util.ArrayList;
@@ -16,11 +17,14 @@ import org.junit.jupiter.api.Test;
 public class ContactFormTest {
     private List<Company> companies;
     private List<Status> statuses;
+    private List<Product> products;
     private Contact marcUsher;
     private Company company1;
     private Company company2;
     private Status status1;
     private Status status2;
+    private Product product1;
+    private Product product2;
 
     @BeforeEach  
     public void setupData() {
@@ -40,6 +44,14 @@ public class ContactFormTest {
         statuses.add(status1);
         statuses.add(status2);
 
+        products = new ArrayList<>();
+        product1 = new Product();
+        product1.setName("Product 1");
+        product2 = new Product();
+        product2.setName("Product 2");
+        products.add(product1);
+        products.add(product2);
+
         marcUsher = new Contact();
         marcUsher.setFirstName("Marc");
         marcUsher.setLastName("Usher");
@@ -50,7 +62,7 @@ public class ContactFormTest {
 
     @Test
     public void formFieldsPopulated() {
-        ContactForm cF = new ContactForm(companies, statuses);
+        ContactForm cF = new ContactForm(companies, statuses, products);
         cF.setContact(marcUsher);
         Assertions.assertEquals("Marc", cF.firstName.getValue());
         Assertions.assertEquals("Usher", cF.lastName.getValue());
@@ -61,7 +73,7 @@ public class ContactFormTest {
 
     @Test
     public void saveEventHasCorrectValues() {
-        ContactForm form = new ContactForm(companies, statuses);
+        ContactForm form = new ContactForm(companies, statuses, products);
         Contact contact = new Contact();
         form.setContact(contact);
 
