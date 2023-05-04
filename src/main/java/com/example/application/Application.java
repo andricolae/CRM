@@ -20,6 +20,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         offlinePath = "offline.html",
         offlineResources = {"images/logo.png", "images/offline.webp"})
 public class Application implements AppShellConfigurator {
+
+    // TODO - Calendar functionality + reminder via email
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

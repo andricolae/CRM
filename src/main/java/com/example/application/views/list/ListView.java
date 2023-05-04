@@ -119,6 +119,22 @@ public class ListView extends VerticalLayout {
         grid.addColumn(contact -> contact.getStatus().getName()).setHeader("Status");
 
         // TODO - grid cell personalized for each status value
+        
+        /*
+        grid.setCellStyleGenerator(cellRef -> {
+            if ("year".equals(cellRef.getPropertyId())) {
+                if (((Integer) cellRef.getValue()) > 1900)
+                    return "rightalign supercell";
+                else
+                    return "rightalign";
+            } else
+                return null;
+        });
+
+        if you want to customize the style of whole rows, you'd want grid.setClassNameGenerator
+        or grid.setPartNameGenerator If you want to customize the cells individually,
+        you probably want column.setClassNameGenerator or column.setPartNameGenerator
+        */
 
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.asSingleSelect().addValueChangeListener(e -> editContact(e.getValue()));
