@@ -34,7 +34,7 @@ public class Contact extends AbstractEntity {
     private String tel;
 
     private String mentions;
-    private String message;
+    private String messageHistory;
 
     @Override
     public String toString() {
@@ -97,7 +97,11 @@ public class Contact extends AbstractEntity {
         this.mentions = mentions;
     }
 
-    public String getMessage() {return message;}
+    public String getMessageHistory() {
+        return messageHistory;
+    }
 
-    public void setMessage(String message) {this.message = message;}
+    public void setMessageHistory(String messageHistory) {
+        this.messageHistory = messageHistory;
+    }
 }

@@ -7,6 +7,7 @@ import com.example.application.data.entity.Contact;
 import com.example.application.data.entity.Status;
 import com.example.application.data.service.MailSenderConfig;
 import com.vaadin.flow.component.*;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -25,13 +26,17 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.shared.Registration;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import javax.mail.MessagingException;
 import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ContactForm extends FormLayout {
     Binder<Contact> binder = new BeanValidationBinder<>(Contact.class);
@@ -46,18 +51,16 @@ public class ContactForm extends FormLayout {
     ComboBox<Product> product = new ComboBox<>("Products");
     TextField emailSubject = new TextField("Subject...");
     TextArea message = new TextArea("Message...");
+    TextArea messageHistory = new TextArea("Email History");
     Button save = new Button("Save");
     Button delete = new Button("Delete");
     Button cancel = new Button("Cancel");
     Button sendEmail = new Button("Send Email");
-    //Button sendWithAttach = new Button("Send Attach");
     String attachName;
     MultiFileMemoryBuffer buffer;
     Upload upload;
-    InputStream inputStream;
+    List<Pair<String, InputStream>> attachments;
     private Contact contact;
-
-    // TODO - More information regarding projects and inquiries status and advance updates via email
 
     public ContactForm(List<Company> companies, List<Status> statuses, List<Product> products) {
         addClassName("contact-form");
@@ -90,9 +93,11 @@ public class ContactForm extends FormLayout {
 
         buffer = new MultiFileMemoryBuffer();
         upload = new Upload(buffer);
+        attachments = new ArrayList<>();
         upload.addSucceededListener(event -> {
-            attachName = event.getFileName();
-            inputStream = buffer.getInputStream(attachName);
+            String attachName = event.getFileName();
+            InputStream inputStream = buffer.getInputStream(attachName);
+            attachments.add(Pair.of(attachName, inputStream));
         });
 
         add(
@@ -104,18 +109,19 @@ public class ContactForm extends FormLayout {
           status,
           mentions,
           product,
+          messageHistory,
           emailSubject,
           message,
           upload,
           createButtonLayout()
         );
-
-
     }
 
     public void setContact(Contact contact) {
         this.contact = contact;
         binder.readBean(contact);
+        message.clear();
+        emailSubject.clear();
     }
 
     private Component createButtonLayout() {
@@ -138,11 +144,11 @@ public class ContactForm extends FormLayout {
         JavaMailSender javaMailSender = mailSenderConfig.javaMailSender();
         EmailService emailService = new EmailService(javaMailSender);
         sendEmail.addClickListener(event -> {
-            if (inputStream == null)
-                emailService.sendNoAttach("mycrm586@gmail.com", email.getValue(), emailSubject.getValue(), message.getValue());
+            if (attachments.isEmpty())
+                emailService.sendNoAttach("andreicalutiu@gmail.com", email.getValue(), emailSubject.getValue(), message.getValue());
             else {
                 try {
-                    emailService.send("mycrm586@gmail.com", email.getValue(), emailSubject.getValue(), message.getValue(), attachName, inputStream);
+                    emailService.send("andreicalutiu@gmail.com", email.getValue(), emailSubject.getValue(), message.getValue(), attachments);
                 } catch (MessagingException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
@@ -152,7 +158,7 @@ public class ContactForm extends FormLayout {
             Notification notification = Notification.show("Email Sent!");
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
             notification.setPosition(Notification.Position.BOTTOM_STRETCH);
-            message.setValue("---" + DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            messageHistory.setValue("---" + DateTimeFormatter.ofPattern("dd/MM/yyyy")
                     .format(LocalDateTime.now()) + "---" + "\n" + message.getValue());
             validateAndSave();
         });

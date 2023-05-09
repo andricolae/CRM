@@ -5,11 +5,16 @@ import com.example.application.data.service.CRMService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -57,8 +62,6 @@ public class ListView extends VerticalLayout {
 
     private Component getContent() {
         VerticalLayout content = new VerticalLayout(grid, cF);
-        //content.setFlexGrow(2, grid);
-        //content.setFlexGrow(1, cF);
         cF.setWidth("75%");
         content.addClassName("content");
         content.setSizeFull();
@@ -117,25 +120,6 @@ public class ListView extends VerticalLayout {
         grid.setColumns("firstName", "lastName", "email");
         grid.addColumn(contact -> contact.getCompany().getName()).setHeader("Company");
         grid.addColumn(contact -> contact.getStatus().getName()).setHeader("Status");
-
-        // TODO - grid cell personalized for each status value
-        
-        /*
-        grid.setCellStyleGenerator(cellRef -> {
-            if ("year".equals(cellRef.getPropertyId())) {
-                if (((Integer) cellRef.getValue()) > 1900)
-                    return "rightalign supercell";
-                else
-                    return "rightalign";
-            } else
-                return null;
-        });
-
-        if you want to customize the style of whole rows, you'd want grid.setClassNameGenerator
-        or grid.setPartNameGenerator If you want to customize the cells individually,
-        you probably want column.setClassNameGenerator or column.setPartNameGenerator
-        */
-
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.asSingleSelect().addValueChangeListener(e -> editContact(e.getValue()));
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);

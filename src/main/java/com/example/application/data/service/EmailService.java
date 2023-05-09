@@ -4,6 +4,7 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.upload.UploadI18N;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.SimpleMailMessage;
@@ -12,11 +13,20 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class EmailService {
@@ -36,40 +46,12 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    /*public void sendWithAttach(String from, String to, String subject,
-                               String text, String attachName,
-                               InputStreamSource inputStream) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(from);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(text, true);
-        helper.addAttachment("attachName", inputStream);
-        mailSender.send(message);
-    }*/
-    /*public void sendMessageWithAttachment(String from, String to, String subject, String text, String pathToAttachment) throws MessagingException {
-
-        MimeMessage message = mailSender.createMimeMessage();
-
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-        helper.setFrom(from);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(text);
-
-        FileSystemResource file = new FileSystemResource(new File(pathToAttachment));
-        helper.addAttachment("attachmentName", file);
-
-        mailSender.send(message);
-    }*/
-
-    // TODO - multiple e-mail attachments
-    public void send(String from, String to, String subject, String body, String attachName, InputStream inputStream) throws MessagingException, IOException {
+    /*
+    public void send(String from, String to, String subject, String body, String attachName, Map<String, InputStream> attachments) throws MessagingException, IOException {
 
         MimeMessage msg = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+
         helper.setFrom(from);
         helper.setTo(to);
         helper.setSubject(subject);
@@ -81,6 +63,26 @@ public class EmailService {
         FileSystemResource fileSR = new FileSystemResource(file);
         helper.addAttachment(attachName, fileSR);
 
+        mailSender.send(msg);
+    }
+    */
+
+    public void send(String from, String to, String subject, String body, List<Pair<String, InputStream>> attachments) throws MessagingException, IOException {
+        Multipart multi = new MimeMultipart();
+        MimeMessage msg = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+        helper.setFrom(from);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(body);
+        for (Pair<String, InputStream> attachment : attachments) {
+            MimeBodyPart bodyPart = new MimeBodyPart();
+            ByteArrayDataSource dataSource = new ByteArrayDataSource(attachment.getRight(), "application/octet-stream");
+            bodyPart.setDataHandler(new DataHandler(dataSource));
+            bodyPart.setFileName(attachment.getLeft());
+            multi.addBodyPart(bodyPart);
+        }
+        msg.setContent(multi);
         mailSender.send(msg);
     }
 }
