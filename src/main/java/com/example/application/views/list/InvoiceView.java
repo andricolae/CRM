@@ -11,11 +11,20 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.LocalDateRenderer;
+import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.context.annotation.Scope;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Date;
+import java.util.Locale;
 
 @Route(value = "invoice", layout = MainLayout.class)
 @org.springframework.stereotype.Component
@@ -23,7 +32,7 @@ import org.springframework.context.annotation.Scope;
 @PageTitle("Invoices | CRM")
 @PermitAll
 public class InvoiceView extends VerticalLayout {
-    Grid<Company> grid = new Grid<>(Company.class);
+    Grid<Invoice> grid = new Grid<>(Invoice.class);
     TextField filterText =  new TextField();
     InvoiceForm iF;
     private CRMService service;
@@ -63,10 +72,9 @@ public class InvoiceView extends VerticalLayout {
     }
 
     private void configureForm() {
-        iF = new InvoiceForm();
+        iF = new InvoiceForm(service.findAllCompanies());
         iF.setWidth("25em");
-        iF.addSaveListener(this::saveCompany); // <1>
-        iF.addDeleteListener(this::deleteCompany); // <2>
+        iF.addSaveListener(this::saveInvoice); // <1>
     }
 
     private void saveInvoice(InvoiceForm.SaveEvent saveEvent) {
@@ -93,7 +101,11 @@ public class InvoiceView extends VerticalLayout {
     private void configureGrid() {
         grid.addClassName("invoice-grid");
         grid.setSizeFull();
-        grid.setColumns("id", "date");
+        grid.setColumns("id");
+        grid.addColumn("date");
+
+
+
         grid.addColumn(invoice -> invoice.getCompany().getName()).setHeader("Company");
         grid.addColumn("total");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));

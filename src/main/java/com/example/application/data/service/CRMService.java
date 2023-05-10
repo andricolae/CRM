@@ -1,13 +1,7 @@
 package com.example.application.data.service;
 
-import com.example.application.data.entity.Product;
-import com.example.application.data.repository.CompanyRepository;
-import com.example.application.data.repository.ContactRepository;
-import com.example.application.data.entity.Company;
-import com.example.application.data.entity.Contact;
-import com.example.application.data.entity.Status;
-import com.example.application.data.repository.ProductRepository;
-import com.example.application.data.repository.StatusRepository;
+import com.example.application.data.entity.*;
+import com.example.application.data.repository.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,16 +12,19 @@ public class CRMService {
     private final CompanyRepository companyRepository;
     private final StatusRepository statusRepository;
     private final ProductRepository productRepository;
+    private final InvoiceRepository invoiceRepository;
 
     public CRMService(ContactRepository contactRepository,
                       CompanyRepository companyRepository,
                       StatusRepository statusRepository,
-                      ProductRepository productRepository) {
+                      ProductRepository productRepository,
+                      InvoiceRepository invoiceRepository) {
 
         this.contactRepository = contactRepository;
         this.companyRepository = companyRepository;
         this.statusRepository = statusRepository;
         this.productRepository = productRepository;
+        this.invoiceRepository = invoiceRepository;
     }
     public List<Contact> findAllContacts(String filterText) {
         if(filterText == null || filterText.isEmpty())
@@ -59,6 +56,13 @@ public class CRMService {
             return productRepository.findAll();
         else
             return productRepository.search(filterText);
+    }
+
+    public List<Invoice> findAllInvoices(String filterText) {
+        if (filterText == null || filterText.isEmpty())
+            return invoiceRepository.findAll();
+        else
+            return invoiceRepository.search(filterText);
     }
 
     public long countContacts(){
@@ -94,6 +98,14 @@ public class CRMService {
             return;
         }
         productRepository.save(product);
+    }
+
+    public void saveInvoice(Invoice invoice) {
+        if(invoice == null) {
+            System.err.println("Invoice is null!");
+            return;
+        }
+        invoiceRepository.save(invoice);
     }
 
     public List<Company> findAllCompanies() {

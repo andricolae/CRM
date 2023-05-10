@@ -1,6 +1,8 @@
 package com.example.application.data.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 
 import java.sql.Date;
@@ -11,10 +13,12 @@ public class Invoice extends AbstractEntity {
     private Long id;
 
     @NotNull
-    private Date date;
+    private java.time.LocalDate date;
 
+    @ManyToOne
+    @JoinColumn(name = "company_id")
     @NotNull
-    private int company_id;
+    private Company company_id;
 
     @NotNull
     private double total;
@@ -28,19 +32,19 @@ public class Invoice extends AbstractEntity {
         this.id = id;
     }
 
-    public Date getDate() {
+    public java.time.LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(java.time.LocalDate date) {
         this.date = date;
     }
 
-    public int getCompany_id() {
+    public Company getCompany() {
         return company_id;
     }
 
-    public void setCompany_id(int company_id) {
+    public void setCompany(Company company_id) {
         this.company_id = company_id;
     }
 
