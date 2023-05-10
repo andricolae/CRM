@@ -1,8 +1,6 @@
 package com.example.application.data.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.sql.Date;
@@ -10,6 +8,8 @@ import java.sql.Date;
 @Entity
 public class Invoice extends AbstractEntity {
     @NotNull
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull

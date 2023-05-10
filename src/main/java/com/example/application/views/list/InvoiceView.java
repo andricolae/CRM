@@ -46,8 +46,8 @@ public class InvoiceView extends VerticalLayout {
         configureForm();
 
         add(
-                getToolbar(),
-                getContent()
+            getToolbar(),
+            getContent()
         );
         updateList();
         closeEditor();
@@ -72,7 +72,7 @@ public class InvoiceView extends VerticalLayout {
     }
 
     private void configureForm() {
-        iF = new InvoiceForm(service.findAllCompanies());
+        iF = new InvoiceForm(service.findAllCompanies(), service.retrieveProducts());
         iF.setWidth("25em");
         iF.addSaveListener(this::saveInvoice); // <1>
     }
@@ -103,9 +103,6 @@ public class InvoiceView extends VerticalLayout {
         grid.setSizeFull();
         grid.setColumns("id");
         grid.addColumn("date");
-
-
-
         grid.addColumn(invoice -> invoice.getCompany().getName()).setHeader("Company");
         grid.addColumn("total");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));

@@ -122,7 +122,21 @@ public class ListView extends VerticalLayout {
         grid.addColumn(contact -> contact.getStatus().getName()).setHeader("Status");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.asSingleSelect().addValueChangeListener(e -> editContact(e.getValue()));
-        grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+        //grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+
+        grid.setPartNameGenerator(contact -> {
+            if (contact.getStatus().getName().equals("Imported lead"))
+                return "imported-lead";
+            if (contact.getStatus().getName().equals("Not contacted"))
+                return "not-contacted";
+            if (contact.getStatus().getName().equals("Contacted"))
+                return "contacted";
+            if (contact.getStatus().getName().equals("Customer"))
+                return "customer";
+            if (contact.getStatus().getName().equals("Closed (lost)"))
+                return "lost";
+            return null;
+        });
     }
 
     private void editContact(Contact contact) {

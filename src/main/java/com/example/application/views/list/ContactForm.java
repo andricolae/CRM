@@ -56,7 +56,6 @@ public class ContactForm extends FormLayout {
     Button delete = new Button("Delete");
     Button cancel = new Button("Cancel");
     Button sendEmail = new Button("Send Email");
-    String attachName;
     MultiFileMemoryBuffer buffer;
     Upload upload;
     List<Pair<String, InputStream>> attachments;
@@ -162,7 +161,6 @@ public class ContactForm extends FormLayout {
                     .format(LocalDateTime.now()) + "---" + "\n" + message.getValue());
             validateAndSave();
         });
-
         return new HorizontalLayout(save, delete, cancel, sendEmail);
     }
 

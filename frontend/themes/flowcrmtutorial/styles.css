@@ -10,6 +10,18 @@ a[highlight] {
     text-decoration: underline;
 }
 
-.imported {
-    background-color: lightskyblue;
+vaadin-grid::part(imported-lead) {
+    background-color: var(--lumo-primary-color-10pct);
+}
+vaadin-grid::part(not-contacted) {
+    background-color: var(--lumo-error-color-10pct);
+}
+vaadin-grid::part(contacted) {
+    background-color: var(--lumo-error-color-50pct);
+}
+vaadin-grid::part(customer) {
+    background-color: var(--lumo-success-color-50pct);
+}
+vaadin-grid::part(lost) {
+    background-color: var(--lumo-shade-30pct);
 }
