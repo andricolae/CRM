@@ -1,5 +1,7 @@
 package com.example.application.data.service;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.pdf.PdfWriter;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.upload.UploadI18N;
@@ -21,10 +23,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -79,6 +78,26 @@ public class EmailService {
             MimeBodyPart bodyPart = new MimeBodyPart();
             ByteArrayDataSource dataSource = new ByteArrayDataSource(attachment.getRight(), "application/octet-stream");
             bodyPart.setDataHandler(new DataHandler(dataSource));
+            bodyPart.setFileName(attachment.getLeft());
+            multi.addBodyPart(bodyPart);
+        }
+        msg.setContent(multi);
+        mailSender.send(msg);
+    }
+
+    public void sendDoc(String from, String to, String subject, String body, List<Pair<String, Document>> attachments) throws MessagingException, IOException {
+        Multipart multi = new MimeMultipart();
+        MimeMessage msg = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(msg, true);
+        helper.setFrom(from);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(body);
+        for (Pair<String, Document> attachment : attachments) {
+            MimeBodyPart bodyPart = new MimeBodyPart();
+            //ByteArrayDataSource dataSource = new ByteArrayDataSource(attachment.getRight(), "application/octet-stream");
+            //ByteArrayDataSource dataSource = new ByteArrayDataSource(, "application/octet-stream");
+            //bodyPart.setDataHandler(new DataHandler(dataSource));
             bodyPart.setFileName(attachment.getLeft());
             multi.addBodyPart(bodyPart);
         }

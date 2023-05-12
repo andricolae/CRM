@@ -105,8 +105,22 @@ public class InvoiceView extends VerticalLayout {
         grid.addColumn("date");
         grid.addColumn(invoice -> invoice.getCompany().getName()).setHeader("Company");
         grid.addColumn("total");
+        //grid.addColumn("paid").setHeader("Payment Status");
+        grid.addColumn(e -> {
+            if (e.isPaid())
+                return "Paid";
+            else
+                return "Not Paid";
+        }).setHeader("PaymentStatus");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+        grid.setPartNameGenerator(invoice -> {
+            if (invoice.isPaid())
+                return "customer";
+            else
+                return "contacted";
+        });
+        grid.asSingleSelect().addValueChangeListener(e -> editInvoice(e.getValue()));
     }
 
     private void addInvoice() {

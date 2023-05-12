@@ -9,7 +9,8 @@ import java.sql.Date;
 public class Invoice extends AbstractEntity {
     @NotNull
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(generator = "emp_seq", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name="emp_seq", sequenceName = "emp_sequence", initialValue =3000, allocationSize = 1)
     private Long id;
 
     @NotNull
@@ -22,6 +23,7 @@ public class Invoice extends AbstractEntity {
 
     @NotNull
     private double total;
+    private boolean paid;
 
     @Override
     public Long getId() {
@@ -54,5 +56,13 @@ public class Invoice extends AbstractEntity {
 
     public void setTotal(double total) {
         this.total = total;
+    }
+
+    public boolean isPaid() {
+        return paid;
+    }
+
+    public void setPaid(boolean paid) {
+        this.paid = paid;
     }
 }

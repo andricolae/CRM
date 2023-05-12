@@ -9,6 +9,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
@@ -23,6 +24,7 @@ public class CompanyForm extends FormLayout{
 
     TextField tel = new TextField("Phone");
     TextField address = new TextField("Address");
+    EmailField email = new EmailField("Email");
     Button save = new Button("Save");
     Button delete = new Button("Delete");
     private Company company;
@@ -38,6 +40,7 @@ public class CompanyForm extends FormLayout{
             com,
             address,
             tel,
+            email,
             createButtonLayout()
         );
     }

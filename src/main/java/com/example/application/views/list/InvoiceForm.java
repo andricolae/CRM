@@ -5,13 +5,18 @@ import com.example.application.data.entity.Invoice;
 import com.example.application.data.entity.Product;
 import com.example.application.data.service.EmailService;
 import com.example.application.data.service.MailSenderConfig;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Font;
+import com.lowagie.text.FontFactory;
+import com.lowagie.text.PageSize;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.*;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
@@ -24,6 +29,8 @@ import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
+import jakarta.persistence.Index;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -31,6 +38,8 @@ import javax.mail.MessagingException;
 import javax.swing.*;
 import java.io.*;
 import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,19 +51,12 @@ public class InvoiceForm extends FormLayout {
     TextArea items = new TextArea("Items");
     TextField pieces = new TextField("Nr. of Items");
     TextField total = new TextField("Total");
-    Button save = new Button("Save");
+    Checkbox paid = new Checkbox("Invoice Paid");
+    Button save = new Button("Generate and Send");
     Button addProduct = new Button("Add Product");
     List<Pair<String, InputStream>> attachments;
 
     private Invoice invoice;
-
-    /*
-        - logo
-        - client company info
-        - our company info
-        - series & nr. + date
-        - pay before
-     */
 
     public InvoiceForm(List<Company> companies, List<Product> products) {
         addClassName("invoice-form");
@@ -79,6 +81,7 @@ public class InvoiceForm extends FormLayout {
                 items,
                 pieces,
                 total,
+                paid,
                 createButtonLayout()
         );
     }
@@ -86,6 +89,23 @@ public class InvoiceForm extends FormLayout {
     public void setInvoice(Invoice invoice) {
         this.invoice = invoice;
         binder.readBean(invoice);
+        if (invoice != null)
+            if (invoice.getTotal() != 0) {
+                company.setReadOnly(true);
+                product.setReadOnly(true);
+                pieces.setReadOnly(true);
+                total.setReadOnly(true);
+                paid.setEnabled(!invoice.isPaid());
+            }
+            else {
+                items.setValue("");
+                product.setValue(null);
+                company.setReadOnly(false);
+                product.setReadOnly(false);
+                pieces.setReadOnly(false);
+                total.setReadOnly(false);
+                paid.setEnabled(false);
+            }
     }
 
     private Component createButtonLayout() {
@@ -93,7 +113,11 @@ public class InvoiceForm extends FormLayout {
         save.addClickShortcut(Key.ENTER);
         save.addClickListener(event -> {
             invoice.setDate(LocalDate.now());
-            generateInvoice();
+            try {
+                generateInvoice();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
             validateAndSave();
         });
 
@@ -119,27 +143,40 @@ public class InvoiceForm extends FormLayout {
         }
     }
 
-    private void validateAndSave() {
-        if (company.getValue() == null) {
-            Notification.show("Choose a Company!").addThemeVariants(NotificationVariant.LUMO_ERROR);
-        } else if (items.getValue().equals("")) {
-            Notification.show("Choose at least an Item!").addThemeVariants(NotificationVariant.LUMO_ERROR);
-        } else {
-            try {
-                binder.writeBean(invoice);
-                fireEvent(new SaveEvent(this, invoice));
-                items.setValue("");
-                product.setValue(null);
-            } catch (ValidationException e) {
-                e.printStackTrace();
+    public void validateAndSave() {
+        if (company.getValue() != null && !items.getValue().equals("")) {
+            if (!invoice.isPaid()) {
+                try {
+                    binder.writeBean(invoice);
+                    fireEvent(new SaveEvent(this, invoice));
+                } catch (ValidationException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        else {
+            if (company.getValue() == null) {
+                Notification.show("Choose a Company!").addThemeVariants(NotificationVariant.LUMO_ERROR);
+            } else if (items.getValue().equals("")) {
+                Notification.show("Choose at least an Item!").addThemeVariants(NotificationVariant.LUMO_ERROR);
+            } else {
+                try {
+                    binder.writeBean(invoice);
+                    fireEvent(new SaveEvent(this, invoice));
+                    items.setValue("");
+                    product.setValue(null);
+                } catch (ValidationException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
 
-    private void generateInvoice() {
+    private void generateInvoice() throws IOException {
 
-        System.out.println(company.getValue().getName());
         String fileName = company.getValue().getName() + "_" + LocalDate.now() + ".pdf";
+
+        /*
         Document document = new Document();
 
         try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
@@ -151,9 +188,9 @@ public class InvoiceForm extends FormLayout {
             document.add(new Paragraph("Billing Address: " + company.getValue().getAddress()));
 
             document.add(new Paragraph(
-                    "**************************************************" +
-                           "---Payable in 15 working days since receiving!---" +
-                           "**************************************************"));
+                   "**************************************************" +
+                   "---Payable in 15 working days since receiving!---" +
+                   "**************************************************"));
             document.close();
 
             //DatabaseService.saveInvoiceDocument(fileName, outputStream);
@@ -164,9 +201,123 @@ public class InvoiceForm extends FormLayout {
         } catch (DocumentException e) {
             throw new RuntimeException(e);
         }
+         */
+
+        Document invoiceDoc = new Document(PageSize.A4);
+
+        PdfWriter.getInstance(invoiceDoc, new FileOutputStream(fileName));
+
+        invoiceDoc.open();
+
+        Font fontTitle = FontFactory.getFont(FontFactory.TIMES_ROMAN);
+        fontTitle.setSize(20);
+        Font fontHeader = FontFactory.getFont(FontFactory.TIMES_ROMAN);
+        fontHeader.setSize(15);
+
+        Paragraph paragraphTitle = new Paragraph("INVOICE | no. " + invoice.getId(), fontTitle);
+        Paragraph paragraphDate = new Paragraph("Date: " + invoice.getDate(), fontHeader);
+        Paragraph paragraphDue = new Paragraph("Due in 15 days since receiving\n\n", fontHeader);
+
+        paragraphTitle.setAlignment(Paragraph.ALIGN_CENTER);
+        paragraphDate.setAlignment(Paragraph.ALIGN_CENTER);
+        paragraphDue.setAlignment(Paragraph.ALIGN_CENTER);
+
+        invoiceDoc.add(paragraphTitle);
+        invoiceDoc.add(paragraphDate);
+        invoiceDoc.add(paragraphDue);
+
+        PdfPTable tableCompanyInfo = new PdfPTable(2);
+
+        tableCompanyInfo.setWidthPercentage(100f);
+        tableCompanyInfo.setWidths(new int[] { 3, 3 });
+        tableCompanyInfo.setSpacingBefore(5);
+
+        PdfPCell cellCompanyInfo = new PdfPCell();
+
+        cellCompanyInfo.setBackgroundColor(CMYKColor.CYAN);
+        cellCompanyInfo.setPadding(5);
+
+        Font font = FontFactory.getFont(FontFactory.COURIER_OBLIQUE);
+        font.setColor(CMYKColor.BLACK);
+
+        cellCompanyInfo.setPhrase(new Phrase("Billed To", font));
+        tableCompanyInfo.addCell(cellCompanyInfo);
+        cellCompanyInfo.setPhrase(new Phrase("Company Info", font));
+        tableCompanyInfo.addCell(cellCompanyInfo);
+
+        System.out.println(invoice.getCompany());
+        tableCompanyInfo.addCell(company.getValue().toString());
+        String ourInfo = "Client: " +
+                "MY COMPANY INC. \n" +
+                "cif: 84503274 \n" +
+                "address: Sibiu, str. Ludos, nr. 2 \n" +
+                "tel: 0762947233 \n" +
+                "email: andreicalutiu@gmail.com \n" +
+                "payment info: RO11BTRLRONCRT04498364";
+        tableCompanyInfo.addCell(ourInfo);
+
+        invoiceDoc.add(tableCompanyInfo);
+
+        Paragraph paragraphBlank = new Paragraph("\n\n", fontTitle);
+        invoiceDoc.add(paragraphBlank);
+
+        PdfPTable tableItems = new PdfPTable(4);
+
+        tableItems.setWidthPercentage(100f);
+        tableItems.setWidths(new int[] { 3, 3, 3, 3 });
+        tableItems.setSpacingBefore(5);
+
+        PdfPCell cellItems = new PdfPCell();
+
+        cellItems.setBackgroundColor(CMYKColor.YELLOW);
+        cellItems.setPadding(5);
+
+        font.setColor(CMYKColor.BLACK);
+
+        cellItems.setPhrase(new Phrase("Item", font));
+        tableItems.addCell(cellItems);
+        cellItems.setPhrase(new Phrase("Price", font));
+        tableItems.addCell(cellItems);
+        cellItems.setPhrase(new Phrase("Quantity", font));
+        tableItems.addCell(cellItems);
+        cellItems.setPhrase(new Phrase("Total", font));
+        tableItems.addCell(cellItems);
+
+        tableItems.addCell("iPhone 14");
+        tableItems.addCell("1099.99");
+        tableItems.addCell("2");
+        tableItems.addCell("2199.98");
+
+        invoiceDoc.add(tableItems);
+
+        invoiceDoc.add(paragraphBlank);
+
+        Paragraph paragraphVat = new Paragraph("VAT: 351.99", fontHeader);
+        Paragraph paragraphTotal = new Paragraph("Total: 2199.98", fontHeader);
+
+        paragraphVat.setAlignment(Paragraph.ALIGN_RIGHT);
+        paragraphTotal.setAlignment(Paragraph.ALIGN_RIGHT);
+
+        invoiceDoc.add(paragraphVat);
+        invoiceDoc.add(paragraphTotal);
+
+        invoiceDoc.add(paragraphBlank);
+
+        Paragraph paragraphClosure1 = new Paragraph("Thank you for doing business with us!", fontHeader);
+        Paragraph paragraphClosure2 = new Paragraph("Valid without signature and/or stamp!", fontHeader);
+
+        paragraphClosure1.setAlignment(Paragraph.ALIGN_CENTER);
+        paragraphClosure2.setAlignment(Paragraph.ALIGN_CENTER);
+
+        invoiceDoc.add(paragraphClosure1);
+        invoiceDoc.add(paragraphClosure2);
+
+        invoiceDoc.close();
+
+        InputStream in = new FileInputStream(fileName);
         attachments = new ArrayList<>();
-        InputStream inputStream = new MultiFileMemoryBuffer().getInputStream(fileName);
-        attachments.add(Pair.of(fileName, inputStream));
+        attachments.add(Pair.of(fileName, in));
+
         sendInvoice();
     }
 

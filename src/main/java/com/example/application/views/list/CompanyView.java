@@ -100,7 +100,7 @@ public class CompanyView extends VerticalLayout {
     private void configureGrid() {
         grid.addClassName("company-grid");
         grid.setSizeFull();
-        grid.setColumns("name", "cif", "com", "address", "tel");
+        grid.setColumns("name", "cif", "com", "address", "tel", "email");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.asSingleSelect().addValueChangeListener(e -> editCompany(e.getValue()));
         grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);

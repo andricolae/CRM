@@ -89,4 +89,14 @@ public class Company extends AbstractEntity {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    @Override
+    public String toString() {
+        return "Client: " +
+                name + '\n' +
+                "cif: '" + cif + '\n' +
+                "address: " + address + '\n' +
+                "tel: " + tel + '\n' +
+                "email: " + email + '\n';
+    }
 }
