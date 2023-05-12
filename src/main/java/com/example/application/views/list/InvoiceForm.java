@@ -3,6 +3,9 @@ package com.example.application.views.list;
 import com.example.application.data.entity.Company;
 import com.example.application.data.entity.Invoice;
 import com.example.application.data.entity.Product;
+import com.example.application.data.repository.ContactRepository;
+import com.example.application.data.repository.InvoiceRepository;
+import com.example.application.data.service.CRMService;
 import com.example.application.data.service.EmailService;
 import com.example.application.data.service.MailSenderConfig;
 import com.lowagie.text.Document;
@@ -45,21 +48,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InvoiceForm extends FormLayout {
+    private final double EXTRACT_VAT = 0.84;
     Binder<Invoice> binder = new BeanValidationBinder<>(Invoice.class);
     ComboBox<Company> company = new ComboBox<>("Company");
     ComboBox<Product> product = new ComboBox<>("Products");
     TextArea items = new TextArea("Items");
     TextField pieces = new TextField("Nr. of Items");
     TextField total = new TextField("Total");
-    Checkbox paid = new Checkbox("Invoice Paid");
     Button save = new Button("Generate and Send");
     Button addProduct = new Button("Add Product");
+    Button paid = new Button("Paid");
     List<Pair<String, InputStream>> attachments;
+    List<Item> itemsPicked;
+    CRMService service;
+    Long tempId;
 
     private Invoice invoice;
 
-    public InvoiceForm(List<Company> companies, List<Product> products) {
+    public InvoiceForm(List<Company> companies, List<Product> products, Long tempId) {
         addClassName("invoice-form");
+
+        this.tempId = tempId;
 
         binder.bindInstanceFields(this);
 
@@ -75,13 +84,14 @@ public class InvoiceForm extends FormLayout {
 
         items.setReadOnly(true);
 
+        itemsPicked = new ArrayList<>();
+
         add(
                 company,
                 product,
                 items,
                 pieces,
                 total,
-                paid,
                 createButtonLayout()
         );
     }
@@ -95,7 +105,6 @@ public class InvoiceForm extends FormLayout {
                 product.setReadOnly(true);
                 pieces.setReadOnly(true);
                 total.setReadOnly(true);
-                paid.setEnabled(!invoice.isPaid());
             }
             else {
                 items.setValue("");
@@ -104,7 +113,6 @@ public class InvoiceForm extends FormLayout {
                 product.setReadOnly(false);
                 pieces.setReadOnly(false);
                 total.setReadOnly(false);
-                paid.setEnabled(false);
             }
     }
 
@@ -124,7 +132,22 @@ public class InvoiceForm extends FormLayout {
         addProduct.addThemeVariants(ButtonVariant.LUMO_SUCCESS);
         addProduct.addClickListener(event -> updateValues());
 
-        return new HorizontalLayout(save, addProduct);
+        paid.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        paid.addClickListener(event -> {
+            try {
+                setInvoicePaid();
+            } catch (ValidationException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        return new HorizontalLayout(save, addProduct, paid);
+    }
+
+    private void setInvoicePaid() throws ValidationException {
+        invoice.setPaid(true);
+        binder.writeBean(invoice);
+        fireEvent(new SaveEvent(this, invoice));
     }
 
     private void updateValues() {
@@ -133,13 +156,25 @@ public class InvoiceForm extends FormLayout {
         } else {
             double tempPrice = Double.parseDouble(pieces.getValue()) * product.getValue().getPrice();
             double totalSum = tempPrice + Double.parseDouble(total.getValue());
+
+            Item temp = new Item();
+            temp.setProd(product.getValue().getName());
+            temp.setPrice(product.getValue().getPrice());
+            temp.setQuantity(Integer.parseInt(pieces.getValue()));
+            temp.setTot(tempPrice);
+            itemsPicked.add(temp);
+
             total.setValue(String.format("%.2f", totalSum));
+
             items.setValue(items.getValue() + "\n" + "---" +
                 product.getValue().getName() + "--- Price: " +
                 product.getValue().getPrice() + " Lei ---  Nr. of Items: " +
                 pieces.getValue() + "--- Total: " + product.getValue().getPrice() *
                 Double.parseDouble(pieces.getValue()) + " Lei");
+
             pieces.setValue("");
+
+            System.out.println(tempId + 1);
         }
     }
 
@@ -214,7 +249,7 @@ public class InvoiceForm extends FormLayout {
         Font fontHeader = FontFactory.getFont(FontFactory.TIMES_ROMAN);
         fontHeader.setSize(15);
 
-        Paragraph paragraphTitle = new Paragraph("INVOICE | no. " + invoice.getId(), fontTitle);
+        Paragraph paragraphTitle = new Paragraph("INVOICE | no. " + (tempId + 1), fontTitle);
         Paragraph paragraphDate = new Paragraph("Date: " + invoice.getDate(), fontHeader);
         Paragraph paragraphDue = new Paragraph("Due in 15 days since receiving\n\n", fontHeader);
 
@@ -283,17 +318,20 @@ public class InvoiceForm extends FormLayout {
         cellItems.setPhrase(new Phrase("Total", font));
         tableItems.addCell(cellItems);
 
-        tableItems.addCell("iPhone 14");
-        tableItems.addCell("1099.99");
-        tableItems.addCell("2");
-        tableItems.addCell("2199.98");
+        for (Item item : itemsPicked) {
+            tableItems.addCell(item.getProd());
+            tableItems.addCell(String.format("%.2f", item.getPrice()));
+            tableItems.addCell(String.valueOf(item.getQuantity()));
+            tableItems.addCell(String.valueOf(item.getTot()));
+        }
 
         invoiceDoc.add(tableItems);
 
         invoiceDoc.add(paragraphBlank);
 
-        Paragraph paragraphVat = new Paragraph("VAT: 351.99", fontHeader);
-        Paragraph paragraphTotal = new Paragraph("Total: 2199.98", fontHeader);
+        double vat = Double.parseDouble(total.getValue()) - (Double.parseDouble(total.getValue()) * EXTRACT_VAT);
+        Paragraph paragraphVat = new Paragraph("VAT: " + String.format("%.2f", vat), fontHeader);
+        Paragraph paragraphTotal = new Paragraph("Total: " + total.getValue(), fontHeader);
 
         paragraphVat.setAlignment(Paragraph.ALIGN_RIGHT);
         paragraphTotal.setAlignment(Paragraph.ALIGN_RIGHT);
@@ -336,6 +374,58 @@ public class InvoiceForm extends FormLayout {
         Notification notification = Notification.show("Email Sent!");
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
         notification.setPosition(Notification.Position.BOTTOM_STRETCH);
+    }
+
+    /* **************************************************************** */
+    public static class Item {
+        public String prod;
+        public double price;
+        public int quantity;
+        public double tot;
+
+        public Item() {}
+
+        public String getProd() {
+            return prod;
+        }
+
+        public void setProd(String prod) {
+            this.prod = prod;
+        }
+
+        public double getPrice() {
+            return price;
+        }
+
+        public void setPrice(double price) {
+            this.price = price;
+        }
+
+        public int getQuantity() {
+            return quantity;
+        }
+
+        public void setQuantity(int quantity) {
+            this.quantity = quantity;
+        }
+
+        public double getTot() {
+            return tot;
+        }
+
+        public void setTot(double tot) {
+            this.tot = tot;
+        }
+
+        @Override
+        public String toString() {
+            return "Item{" +
+                    "prod='" + prod + '\'' +
+                    ", price=" + price +
+                    ", quantity=" + quantity +
+                    ", tot=" + tot +
+                    '}';
+        }
     }
 
     /* **************************** Events **************************** */

@@ -23,7 +23,6 @@ public class Application implements AppShellConfigurator {
 
     // TODO - Calendar functionality + reminder via email
     // TODO - Database ID
-
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

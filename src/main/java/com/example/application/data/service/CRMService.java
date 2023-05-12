@@ -108,6 +108,10 @@ public class CRMService {
         invoiceRepository.save(invoice);
     }
 
+    public Invoice getLast() {
+        return invoiceRepository.retrieveLast();
+    }
+
     public List<Company> findAllCompanies() {
         return companyRepository.findAll();
     }

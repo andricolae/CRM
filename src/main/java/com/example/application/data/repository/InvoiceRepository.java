@@ -14,4 +14,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
             "inner join Company c where lower(c.name) like lower(concat('%', :searchTerm, '%'))" +
             "and i.company_id = c.id")
     List<Invoice> search(@Param("searchTerm") String searchTerm);
+
+    @Query("select i from Invoice i order by id desc limit 1")
+    Invoice retrieveLast();
 }
