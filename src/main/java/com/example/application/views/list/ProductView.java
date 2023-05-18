@@ -25,7 +25,7 @@ public class ProductView extends VerticalLayout {
     Grid<Product> grid = new Grid<>(Product.class);
     TextField filterText = new TextField();
     ProductForm cF;
-    private CRMService service;
+    private final CRMService service;
 
     public ProductView(CRMService service) {
         this.service = service;
@@ -55,8 +55,6 @@ public class ProductView extends VerticalLayout {
     private Component getContent() {
         VerticalLayout content = new VerticalLayout(grid, cF);
         cF.setWidth("75%");
-        //content.setFlexGrow(2, grid);
-        //content.setFlexGrow(1, cF);
         content.addClassName("content");
         content.setSizeFull();
         return content;
@@ -65,8 +63,8 @@ public class ProductView extends VerticalLayout {
     private void configureForm() {
         cF = new ProductForm();
         cF.setWidth("25em");
-        cF.addSaveListener(this::saveProduct); // <1>
-        cF.addDeleteListener(this::deleteProduct); // <2>
+        cF.addSaveListener(this::saveProduct);
+        cF.addDeleteListener(this::deleteProduct);
     }
 
     private void deleteProduct(ProductForm.DeleteEvent deleteEvent) {

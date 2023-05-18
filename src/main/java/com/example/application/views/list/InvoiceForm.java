@@ -3,13 +3,9 @@ package com.example.application.views.list;
 import com.example.application.data.entity.Company;
 import com.example.application.data.entity.Invoice;
 import com.example.application.data.entity.Product;
-import com.example.application.data.repository.ContactRepository;
-import com.example.application.data.repository.InvoiceRepository;
-import com.example.application.data.service.CRMService;
 import com.example.application.data.service.EmailService;
 import com.example.application.data.service.MailSenderConfig;
 import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
 import com.lowagie.text.Font;
 import com.lowagie.text.FontFactory;
 import com.lowagie.text.PageSize;
@@ -19,7 +15,6 @@ import com.lowagie.text.pdf.*;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
@@ -27,22 +22,15 @@ import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
-import jakarta.persistence.Index;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.mail.javamail.JavaMailSender;
 
 import javax.mail.MessagingException;
-import javax.swing.*;
 import java.io.*;
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +48,6 @@ public class InvoiceForm extends FormLayout {
     Button paid = new Button("Paid");
     List<Pair<String, InputStream>> attachments;
     List<Item> itemsPicked;
-    CRMService service;
     Long tempId;
 
     private Invoice invoice;
@@ -121,10 +108,12 @@ public class InvoiceForm extends FormLayout {
         save.addClickShortcut(Key.ENTER);
         save.addClickListener(event -> {
             invoice.setDate(LocalDate.now());
-            try {
-                generateInvoice();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+            if(!items.getValue().equals("")) {
+                try {
+                    generateInvoice();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
             validateAndSave();
         });
@@ -173,8 +162,6 @@ public class InvoiceForm extends FormLayout {
                 Double.parseDouble(pieces.getValue()) + " Lei");
 
             pieces.setValue("");
-
-            //System.out.println(tempId + 1);
         }
     }
 
@@ -210,33 +197,6 @@ public class InvoiceForm extends FormLayout {
     private void generateInvoice() throws IOException {
 
         String fileName = company.getValue().getName() + "_" + LocalDate.now() + ".pdf";
-
-        /*
-        Document document = new Document();
-
-        try (FileOutputStream outputStream = new FileOutputStream(fileName)) {
-
-            PdfWriter.getInstance(document, outputStream);
-            document.open();
-
-            document.add(new Paragraph("Invoice for " + company.getValue().getName()));
-            document.add(new Paragraph("Billing Address: " + company.getValue().getAddress()));
-
-            document.add(new Paragraph(
-                   "**************************************************" +
-                   "---Payable in 15 working days since receiving!---" +
-                   "**************************************************"));
-            document.close();
-
-            //DatabaseService.saveInvoiceDocument(fileName, outputStream);
-
-            Notification.show("Invoice generated and saved!");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (DocumentException e) {
-            throw new RuntimeException(e);
-        }
-         */
 
         Document invoiceDoc = new Document(PageSize.A4);
 
@@ -282,12 +242,13 @@ public class InvoiceForm extends FormLayout {
 
         System.out.println(invoice.getCompany());
         tableCompanyInfo.addCell(company.getValue().toString());
-        String ourInfo = "MY COMPANY INC. \n" +
-                "cif: 84503274 \n" +
-                "address: Sibiu, str. Ludos, nr. 2 \n" +
-                "tel: 0762947233 \n" +
-                "email: andreicalutiu@gmail.com \n" +
-                "payment info: RO11BTRLRONCRT04498364";
+        String ourInfo = """
+                MY COMPANY INC.\s
+                cif: 84503274\s
+                address: Sibiu, str. Ludos, nr. 2\s
+                tel: 0762947233\s
+                email: andreicalutiu@gmail.com\s
+                payment info: RO11BTRLRONCRT04498364""";
         tableCompanyInfo.addCell(ourInfo);
 
         invoiceDoc.add(tableCompanyInfo);
@@ -365,9 +326,7 @@ public class InvoiceForm extends FormLayout {
         try {
             emailService.send("andreicalutiu@gmail.com", company.getValue().getEmail(), "Invoice_" + LocalDate.now(),
                     "Hi, attached is your invoice!", attachments);
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (MessagingException | IOException e) {
             throw new RuntimeException(e);
         }
         Notification notification = Notification.show("Email Sent!");

@@ -5,16 +5,10 @@ import com.example.application.data.service.CRMService;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -31,7 +25,7 @@ public class ListView extends VerticalLayout {
     TextField filterText =  new TextField();
     TextField filterByCompany = new TextField();
     ContactForm cF;
-    private CRMService service;
+    private final CRMService service;
     public ListView(CRMService service) {
         this.service = service;
         addClassName("list-view");
@@ -71,10 +65,10 @@ public class ListView extends VerticalLayout {
     private void configureForm() {
         cF = new ContactForm(service.findAllCompanies(), service.findAllStatuses(), service.retrieveProducts());
         cF.setWidth("30em");
-        cF.addSaveListener(this::saveContact); // <1>
-        cF.addDeleteListener(this::deleteContact); // <2>
-        cF.addCloseListener(e -> closeEditor()); // <3>
-    };
+        cF.addSaveListener(this::saveContact);
+        cF.addDeleteListener(this::deleteContact);
+        cF.addCloseListener(e -> closeEditor());
+    }
 
     private void saveContact(ContactForm.SaveEvent event){
         service.saveContact(event.getContact());
@@ -122,7 +116,6 @@ public class ListView extends VerticalLayout {
         grid.addColumn(contact -> contact.getStatus().getName()).setHeader("Status");
         grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.asSingleSelect().addValueChangeListener(e -> editContact(e.getValue()));
-        //grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
 
         grid.setPartNameGenerator(contact -> {
             if (contact.getStatus().getName().equals("Imported lead"))

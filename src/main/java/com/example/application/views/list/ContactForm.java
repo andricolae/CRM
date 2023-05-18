@@ -7,7 +7,6 @@ import com.example.application.data.entity.Contact;
 import com.example.application.data.entity.Status;
 import com.example.application.data.service.MailSenderConfig;
 import com.vaadin.flow.component.*;
-import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -34,9 +33,7 @@ import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ContactForm extends FormLayout {
     Binder<Contact> binder = new BeanValidationBinder<>(Contact.class);
@@ -148,9 +145,7 @@ public class ContactForm extends FormLayout {
             else {
                 try {
                     emailService.send("andreicalutiu@gmail.com", email.getValue(), emailSubject.getValue(), message.getValue(), attachments);
-                } catch (MessagingException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
+                } catch (MessagingException | IOException e) {
                     throw new RuntimeException(e);
                 }
             }

@@ -2,7 +2,6 @@ package com.example.application.views.list;
 
 import com.example.application.data.entity.Invoice;
 import com.example.application.data.service.CRMService;
-import com.example.application.data.entity.Company;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -11,20 +10,12 @@ import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.renderer.LocalDateRenderer;
-import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.context.annotation.Scope;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Date;
-import java.util.Locale;
 
 @Route(value = "invoice", layout = MainLayout.class)
 @org.springframework.stereotype.Component
@@ -35,7 +26,7 @@ public class InvoiceView extends VerticalLayout {
     Grid<Invoice> grid = new Grid<>(Invoice.class);
     TextField filterText =  new TextField();
     InvoiceForm iF;
-    private CRMService service;
+    private final CRMService service;
 
     public InvoiceView(CRMService service) {
         this.service = service;
@@ -75,7 +66,7 @@ public class InvoiceView extends VerticalLayout {
         Long idLast = service.getLast().getId();
         iF = new InvoiceForm(service.findAllCompanies(), service.retrieveProducts(), idLast);
         iF.setWidth("25em");
-        iF.addSaveListener(this::saveInvoice); // <1>
+        iF.addSaveListener(this::saveInvoice);
     }
 
     private void saveInvoice(InvoiceForm.SaveEvent saveEvent) {
@@ -106,7 +97,6 @@ public class InvoiceView extends VerticalLayout {
         grid.addColumn("date");
         grid.addColumn(invoice -> invoice.getCompany().getName()).setHeader("Company");
         grid.addColumn("total");
-        //grid.addColumn("paid").setHeader("Payment Status");
         grid.addColumn(e -> {
             if (e.isPaid())
                 return "Paid";

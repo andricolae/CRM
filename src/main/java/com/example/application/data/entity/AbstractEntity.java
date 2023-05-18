@@ -12,8 +12,7 @@ public abstract class AbstractEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idgenerator")
-    // The initial value is to account for data.sql demo data ids
-    @SequenceGenerator(name = "idgenerator", initialValue = 1000)
+    @SequenceGenerator(name = "idgenerator", initialValue = 1000, allocationSize = 1)
     private Long id;
 
     @Version
@@ -41,10 +40,9 @@ public abstract class AbstractEntity {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof AbstractEntity)) {
-            return false; // null or other class
+        if (!(obj instanceof AbstractEntity other)) {
+            return false;
         }
-        AbstractEntity other = (AbstractEntity) obj;
 
         if (getId() != null) {
             return getId().equals(other.getId());

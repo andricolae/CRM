@@ -3,15 +3,15 @@ package com.example.application.data.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
-import java.sql.Date;
-
 @Entity
 public class Invoice extends AbstractEntity {
+
     @NotNull
     @Id
     @GeneratedValue(generator = "emp_seq", strategy = GenerationType.SEQUENCE)
     @SequenceGenerator(name="emp_seq", sequenceName = "emp_sequence", initialValue =3000, allocationSize = 1)
     private Long id;
+
 
     @NotNull
     private java.time.LocalDate date;

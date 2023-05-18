@@ -25,7 +25,7 @@ public class CompanyView extends VerticalLayout {
     Grid<Company> grid = new Grid<>(Company.class);
     TextField filterText =  new TextField();
     CompanyForm cF;
-    private CRMService service;
+    private final CRMService service;
 
     public CompanyView(CRMService service) {
         this.service = service;
@@ -56,8 +56,6 @@ public class CompanyView extends VerticalLayout {
     private Component getContent() {
         VerticalLayout content = new VerticalLayout(grid, cF);
         cF.setWidth("75%");
-        //content.setFlexGrow(2, grid);
-        //content.setFlexGrow(1, cF);
         content.addClassName("content");
         content.setSizeFull();
         return content;
@@ -66,8 +64,8 @@ public class CompanyView extends VerticalLayout {
     private void configureForm() {
         cF = new CompanyForm();
         cF.setWidth("25em");
-        cF.addSaveListener(this::saveCompany); // <1>
-        cF.addDeleteListener(this::deleteCompany); // <2>
+        cF.addSaveListener(this::saveCompany);
+        cF.addDeleteListener(this::deleteCompany);
     }
 
     private void deleteCompany(CompanyForm.DeleteEvent deleteEvent) {

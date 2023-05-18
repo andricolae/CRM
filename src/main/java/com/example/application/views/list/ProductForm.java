@@ -15,8 +15,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.shared.Registration;
 
-import java.awt.*;
-
 public class ProductForm extends FormLayout {
 
     Binder<Product> binder = new BeanValidationBinder<>(Product.class);

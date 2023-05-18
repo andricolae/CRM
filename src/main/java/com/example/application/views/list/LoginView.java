@@ -12,7 +12,7 @@ import com.vaadin.flow.router.Route;
 @PageTitle("Login | CRM")
 public class LoginView extends VerticalLayout implements BeforeEnterListener {
 
-    private LoginForm login = new LoginForm();
+    private final LoginForm login = new LoginForm();
     public LoginView() {
         addClassName("login-view");
         setSizeFull();

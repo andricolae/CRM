@@ -16,7 +16,7 @@ import jakarta.annotation.security.PermitAll;
 @PageTitle("Dashboard | CRM")
 @PermitAll
 public class DashboardView extends VerticalLayout {
-    private CRMService service;
+    private final CRMService service;
 
     public DashboardView(CRMService service) {
         this.service = service;
@@ -34,9 +34,7 @@ public class DashboardView extends VerticalLayout {
     private Component getCompaniesChart() {
         Chart chart = new Chart(ChartType.PIE);
         DataSeries dataSeries = new DataSeries();
-        service.findAllCompanies().forEach(company -> {
-            dataSeries.add(new DataSeriesItem(company.getName(), company.getEmployeeCount()));
-        });
+        service.findAllCompanies().forEach(company -> dataSeries.add(new DataSeriesItem(company.getName(), company.getEmployeeCount())));
         chart.getConfiguration().setSeries(dataSeries);
         return chart;
     }
