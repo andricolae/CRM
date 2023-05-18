@@ -39,8 +39,8 @@ public class MainLayout extends AppLayout {
                 new RouterLink("Company Information", CompanyView.class),
                 new RouterLink("Product Information", ProductView.class),
                 //new RouterLink("Dashboard", DashboardView.class)
-                new RouterLink("Invoices", InvoiceView.class),
-                new RouterLink("Meetings", CalendarView.class)
+                new RouterLink("Invoices", InvoiceView.class)
+                //new RouterLink("Meetings", CalendarView.class)
         ));
     }
 }

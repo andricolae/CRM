@@ -174,7 +174,7 @@ public class InvoiceForm extends FormLayout {
 
             pieces.setValue("");
 
-            System.out.println(tempId + 1);
+            //System.out.println(tempId + 1);
         }
     }
 
@@ -240,7 +240,7 @@ public class InvoiceForm extends FormLayout {
 
         Document invoiceDoc = new Document(PageSize.A4);
 
-        PdfWriter.getInstance(invoiceDoc, new FileOutputStream(fileName));
+        PdfWriter.getInstance(invoiceDoc, new FileOutputStream("./invoices/" + fileName));
 
         invoiceDoc.open();
 
@@ -282,8 +282,7 @@ public class InvoiceForm extends FormLayout {
 
         System.out.println(invoice.getCompany());
         tableCompanyInfo.addCell(company.getValue().toString());
-        String ourInfo = "Client: " +
-                "MY COMPANY INC. \n" +
+        String ourInfo = "MY COMPANY INC. \n" +
                 "cif: 84503274 \n" +
                 "address: Sibiu, str. Ludos, nr. 2 \n" +
                 "tel: 0762947233 \n" +
@@ -352,7 +351,7 @@ public class InvoiceForm extends FormLayout {
 
         invoiceDoc.close();
 
-        InputStream in = new FileInputStream(fileName);
+        InputStream in = new FileInputStream("./invoices/" + fileName);
         attachments = new ArrayList<>();
         attachments.add(Pair.of(fileName, in));
 
