@@ -50,6 +50,10 @@ public class InvoiceForm extends FormLayout {
     List<Item> itemsPicked;
     Long tempId;
 
+    public void setTempId(Long tempId) {
+        this.tempId = tempId;
+    }
+
     private Invoice invoice;
 
     public InvoiceForm(List<Company> companies, List<Product> products, Long tempId) {
@@ -107,6 +111,7 @@ public class InvoiceForm extends FormLayout {
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
         save.addClickShortcut(Key.ENTER);
         save.addClickListener(event -> {
+            invoice.setId(tempId + 1);
             invoice.setDate(LocalDate.now());
             if(!items.getValue().equals("")) {
                 try {

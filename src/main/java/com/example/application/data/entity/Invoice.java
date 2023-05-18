@@ -4,14 +4,14 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-public class Invoice extends AbstractEntity {
+public class Invoice {
 
     @NotNull
     @Id
-    @GeneratedValue(generator = "emp_seq", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name="emp_seq", sequenceName = "emp_sequence", initialValue =3000, allocationSize = 1)
+    @Column(name = "id", unique = true, nullable = false)
+    //@GeneratedValue(generator = "emp_seq", strategy = GenerationType.SEQUENCE)
+    //@SequenceGenerator(name="emp_seq", sequenceName = "emp_sequence", initialValue =3000, allocationSize = 1)
     private Long id;
-
 
     @NotNull
     private java.time.LocalDate date;
@@ -25,7 +25,6 @@ public class Invoice extends AbstractEntity {
     private double total;
     private boolean paid;
 
-    @Override
     public Long getId() {
         return id;
     }
@@ -37,6 +36,8 @@ public class Invoice extends AbstractEntity {
     public java.time.LocalDate getDate() {
         return date;
     }
+
+    public Invoice() {}
 
     public void setDate(java.time.LocalDate date) {
         this.date = date;

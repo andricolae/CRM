@@ -27,6 +27,7 @@ public class InvoiceView extends VerticalLayout {
     TextField filterText =  new TextField();
     InvoiceForm iF;
     private final CRMService service;
+    Long idLast;
 
     public InvoiceView(CRMService service) {
         this.service = service;
@@ -63,10 +64,11 @@ public class InvoiceView extends VerticalLayout {
     }
 
     private void configureForm() {
-        Long idLast = service.getLast().getId();
+        idLast = service.getLast().getId();
         iF = new InvoiceForm(service.findAllCompanies(), service.retrieveProducts(), idLast);
         iF.setWidth("25em");
         iF.addSaveListener(this::saveInvoice);
+        iF.setVisible(true);
     }
 
     private void saveInvoice(InvoiceForm.SaveEvent saveEvent) {
@@ -125,6 +127,7 @@ public class InvoiceView extends VerticalLayout {
         else {
             iF.setInvoice(invoice);
             iF.setVisible(true);
+            iF.setTempId(service.getLast().getId());
             addClassName("editing");
         }
     }
