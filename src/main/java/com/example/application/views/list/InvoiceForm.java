@@ -287,7 +287,7 @@ public class InvoiceForm extends FormLayout {
             tableItems.addCell(item.getProd());
             tableItems.addCell(String.format("%.2f", item.getPrice()));
             tableItems.addCell(String.valueOf(item.getQuantity()));
-            tableItems.addCell(String.valueOf(item.getTot()));
+            tableItems.addCell(String.format("%.2f", item.getTot()));
         }
 
         invoiceDoc.add(tableItems);

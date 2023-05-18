@@ -65,6 +65,8 @@ public class InvoiceView extends VerticalLayout {
 
     private void configureForm() {
         idLast = service.getLast().getId();
+        if (service.getLast().getId() == null)
+            idLast = 1L;
         iF = new InvoiceForm(service.findAllCompanies(), service.retrieveProducts(), idLast);
         iF.setWidth("25em");
         iF.addSaveListener(this::saveInvoice);

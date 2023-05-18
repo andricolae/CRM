@@ -9,8 +9,6 @@ public class Invoice {
     @NotNull
     @Id
     @Column(name = "id", unique = true, nullable = false)
-    //@GeneratedValue(generator = "emp_seq", strategy = GenerationType.SEQUENCE)
-    //@SequenceGenerator(name="emp_seq", sequenceName = "emp_sequence", initialValue =3000, allocationSize = 1)
     private Long id;
 
     @NotNull
