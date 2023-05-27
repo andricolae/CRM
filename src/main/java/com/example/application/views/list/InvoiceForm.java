@@ -163,8 +163,7 @@ public class InvoiceForm extends FormLayout {
             items.setValue(items.getValue() + "\n" + "---" +
                 product.getValue().getName() + "--- Price: " +
                 product.getValue().getPrice() + " Lei ---  Nr. of Items: " +
-                pieces.getValue() + "--- Total: " + product.getValue().getPrice() *
-                Double.parseDouble(pieces.getValue()) + " Lei");
+                pieces.getValue() + "--- Total: " + String.format("%.2f", tempPrice) + " Lei");
 
             pieces.setValue("");
         }
