@@ -151,7 +151,6 @@ public class ContactForm extends FormLayout {
             }
             Notification notification = Notification.show("Email Sent!");
             notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-            notification.setPosition(Notification.Position.BOTTOM_STRETCH);
             messageHistory.setValue("---" + DateTimeFormatter.ofPattern("dd/MM/yyyy")
                     .format(LocalDateTime.now()) + "---" + "\n" + message.getValue());
             validateAndSave();

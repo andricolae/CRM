@@ -335,7 +335,6 @@ public class InvoiceForm extends FormLayout {
         }
         Notification notification = Notification.show("Email Sent!");
         notification.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-        notification.setPosition(Notification.Position.BOTTOM_STRETCH);
     }
 
     /* **************************************************************** */

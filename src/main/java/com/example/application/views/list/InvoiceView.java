@@ -113,7 +113,7 @@ public class InvoiceView extends VerticalLayout {
             if (invoice.isPaid())
                 return "customer";
             else
-                return "contacted";
+                return "not-contacted";
         });
         grid.asSingleSelect().addValueChangeListener(e -> editInvoice(e.getValue()));
     }

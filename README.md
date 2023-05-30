@@ -1,7 +1,5 @@
 #  CRM
 
-...
-
 ## The application
 
 A CRM Application based on Spring and Vaadin Frameworks
