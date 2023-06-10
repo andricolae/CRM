@@ -20,11 +20,10 @@ public class LoginView extends VerticalLayout implements BeforeEnterListener {
         setJustifyContentMode(JustifyContentMode.CENTER);
         login.setAction("login");
         add(
-                new H1("CRM"),
-                login
+            new H1("Login to your CRM"),
+            login
         );
     }
-
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if(event.getLocation()
